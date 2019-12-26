@@ -1,5 +1,10 @@
 import { isDate, isPlainObject } from './util'
 
+interface URLOrigin {
+  protocol: string
+  host: string
+}
+
 // 处理特殊字符
 function encode(val: string): string {
   return encodeURIComponent(val)
@@ -68,4 +73,29 @@ export function buildURL(url: string, params?: any): string {
   }
 
   return url
+}
+
+export function isURLSameOrigin(requestURL: string): boolean {
+  const parsedOrigin = resolve(requestURL)
+  return (parsedOrigin.protocol === curOrigin.protocol && parsedOrigin.host === curOrigin.host)
+}
+
+const urlParsingNode = document.createElement('a')
+const curOrigin = resolve(window.location.href)
+
+function resolve(url: string): URLOrigin {
+  urlParsingNode.setAttribute('hrel', url)
+  const { protocol, host } = urlParsingNode
+  return {
+    protocol,
+    host
+  }
+}
+
+export function isAbsoluteURL(url: string): boolean {
+  return /(^[a-z][a-z\d\+\-\.]*:)?\/\//i.test(url)
+}
+
+export function combineURL(baseURL: string, relativeURL?: string): string {
+  return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL
 }
